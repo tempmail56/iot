@@ -1,0 +1,32 @@
+import adafruit_dht
+import board
+from time import sleep
+dhtDevice=adafruit_dht.DHT11(board.D4,use_pulseio=False)
+def readDHT(retries=5):
+    while retries:
+        try:
+            H=dhtDevice.humidity
+            T=dhtDevice.temperature
+            if isinstance(H,int)and isinstance(T,int):
+                return H,T
+        except RuntimeError as error:
+                print(error.args[0])
+                sleep(1)
+                retries-=1
+                continue
+        except Exception as error:
+                    dhtDevice.exit()
+                    raise error
+        return(None,None)
+if __name__=='__main__':
+    try:
+        while True:
+            humidity,temperature=readDHT()
+            if temperature!=None and humidity!=None:
+                print('Humidity={}%',format(humidity))
+                print('Temperature={}\u00B0C'.format(temperature))
+            else:
+                print('unable to read the DHT sensor')
+            sleep(5)
+    except KeyboardInterrupt:
+        pass
