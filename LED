@@ -1,0 +1,15 @@
+import time
+import RPi. GPIO as gpio
+gpio.setwarnings(False) 
+gpio.setmode(gpio.BCM)
+led1=6
+gpio.setup(led1,gpio.OUT,initial=gpio.LOW) 
+try:
+    while(True):
+        gpio.output(led1,gpio.LOW) 
+        time.sleep(2) 
+        gpio.output(led1,gpio.HIGH) 
+        time.sleep(1) 
+except KeyboardInterrupt:
+    gpio.output(led1,gpio.LOW)
+    gpio.cleanup()
