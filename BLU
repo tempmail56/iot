@@ -1,0 +1,51 @@
+import TEMP
+import time
+from datetime import datetime 
+from gpiozero import LED 
+led=LED(6)
+import serial
+s=serial.Serial("/dev/rfcomm0",9600,timeout=1)
+import Adafruit_GPIO.SPI as SPI
+import Adafruit_MCP3008
+SPI_PORT=0
+SPI_DEVICE=0
+mcp=Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(SPI_PORT,SPI_DEVICE))
+def send_bluetooth_dht():
+    h,t=TEMP.readDHT()
+    time=datetime.now().strftime('%H:%M:%S')
+    if h!=None or t!=None:
+        s.write("Temperature at {} is {}\n".format(time,t).encode('ascii' ))
+        s.write("Humidity at {} is {}\n".format(time,h).encode('ascii'))
+        print('Humidity={};Temperature={}'.format(h,t))
+    else:
+        s.write('Unable to read from sensor at time {} \n'.format(time).encode('ascii')) 
+        print('Unable to read from sensor at time {}'.format(time))
+def send_bluetooth_light():
+    lightvalue=mcp.read_adc(1)
+    time=datetime.now().strftime('%H:%M:%S')
+    s.write('Light value at {} is {}\n'.format(time,lightvalue).encode('ascii'))
+    print('Light value at {}:{}'.format(time,lightvalue))
+commands=('on','off','light','dht','')
+try:
+    while True:
+        inp=s.readline().decode('utf8').strip().lower()
+        print(inp)
+        if inp in commands:
+            if inp=='dht':
+                send_bluetooth_dht()
+            if inp=='on':
+                led.on()
+                print("LED is ON")
+                s.write('LED Turned ON\n'.encode('ascii'))
+            if inp=='off':
+                led.off()
+                s.write('LED Turned OFF\n'.encode('ascii'))
+                print("LED is OFF")
+            if inp=='light':
+                send_bluetooth_light()
+        else:
+            print('Invalid command word')
+            s.write('Invalid command word\n'.encode('ascii'))
+            time.sleep(2)
+except KeyboardInterrupt:
+    pass
