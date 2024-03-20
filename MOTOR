@@ -1,0 +1,21 @@
+import time
+import RPi.GPIO as gpio 
+gpio.setwarnings(False) 
+gpio.setmode(gpio.BCM)
+relay1=16
+switch1=19
+gpio.setup(relay1,gpio.OUT,initial=gpio.LOW)
+gpio.setup(switch1,gpio.IN)
+def toggleRelay(event):
+    if event==switch1:
+        if gpio.input(switch1)==gpio.LOW:
+            if gpio.input(relay1):
+                gpio.output(relay1,gpio.LOW)
+            else:
+                gpio.output(relay1,gpio.HIGH)
+gpio.add_event_detect(switch1,gpio.BOTH,callback=toggleRelay,bouncetime=10)
+try:
+    while(True):
+        time.sleep(1)
+except KeyboardInterrupt:
+    gpio.cleanup()
