@@ -1,0 +1,50 @@
+import pi4dht11
+from datetime import datetime
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+# To detect IP address of the system
+from subprocess import check_output
+ips = check_output(['hostname', '--all-ip-addresses'])
+ipAddress = ips[:ips.find(b' ')].decode()
+print(ipAddress)
+
+serverPort = 8000 #You can choose any available port; by default, it is 8000
+
+def get_html():
+    h,t = pi4dht11.readDHT()
+    d=datetime.now()
+    da= d.strftime("%d-%m-%Y")
+    ti=d.strftime("%H:%M:%S")
+    html = f""" <!DOCTYPE html>
+    <html>
+    <head>
+    <title>RPi DHT11 data</title>
+    <meta http-equiv="refresh" content="60">
+    </head>
+    <div style="max-width:350px;margin:auto;background: rgba(128, 128, 0, 0.2)">
+
+    <h3> <span style="color:blue;display:inline-block;width:6em;text-align:right">Temperatute: </span> <span style="color:red;">{t}<sup>o</sup>C</span></h3>
+    <h3> <span style="color:blue;display:inline-block;width:6em;text-align:right">Humidity:</span> <span style="color:red;"> {h}%</span></h3>
+    <h3> <span style="color:blue;display:inline-block;width:6em;text-align:right">Date:</span> <span style="color:red;"> {da}</span></h3>
+    <h3> <span style="color:blue;display:inline-block;width:6em;text-align:right">Time:</span> <span style="color:red;"> {ti}</span></h3>
+    <p style="color:DarkMagenta;">Refreshes every 60 seconds, automatically</p>
+    </div>
+    </html>
+  
+    """
+    return(html)
+
+class MyServer(BaseHTTPRequestHandler):
+    def do_GET(self): #the do_GET method is inherited from BaseHTTPRequestHandler 
+       self.send_response(200)
+       self.send_header("Content-type", "text/html")
+       self.end_headers()
+       self.wfile.write(bytes(get_html(), "utf-8"))
+       
+webServer = HTTPServer((ipAddress, serverPort), MyServer)
+print("Server started http://%s:%s" % (ipAddress, serverPort))  #Server starts
+try:
+    webServer.serve_forever()
+except KeyboardInterrupt:
+    webServer.server_close()  #Executes when you hit a keyboard interrupt, closing the server
+    print("Server stopped.")    
