@@ -1,0 +1,17 @@
+import tt
+import urllib.request
+import time
+WRITE_API_KEY="RS1AG9DYXZIC77AD"
+baseurl=f"https://api.thingspeak.com/update?api_key={WRITE_API_KEY}"
+H,T= tt.readDHT()
+if H!=None and T!=None:
+    try:
+        f=urllib.request.urlopen(baseurl+f'&field1={T}&field2={H}')
+        f.close()
+        print(f'Humidity={h}%')
+        print(f'Temperature={T}\400B0C')
+        print("uploaded to thingspeak succesfully")
+    except:
+        print("not succeful in uploading to thingspeak.....exiting")
+else:
+    print("sensor reading error occured")
