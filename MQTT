@@ -1,0 +1,17 @@
+import paho.mqtt.publish as publish
+import pi4dht11
+import time
+channelID='1521496'
+mqtt_host = "mqtt3.thingspeak.com"
+topic = "channels/" + channelID + "/publish"
+mqtt_client_ID = "IR4sJhw4GjwgCCMLFzwbMyw"
+mqtt_username  = "IR4sJhw4GjwgCCMLFzwbMyw"
+mqtt_password  = "JQXBC5sQ1H75tgvep0dtvX03"
+h,t = pi4dht11.readDHT()
+print(" Temperature = {} AND Humidity = {}".format(t,h))
+payload = "field1=" + str(h) + "&field2=" + str(t)
+try:
+    publish.single(topic, payload, hostname=mqtt_host, transport="websockets", port=80,client_id=mqtt_client_ID,auth={'username':mqtt_username,'password':mqtt_password})
+    print("Data Published Successfully")
+except:
+    print ("There was an error while publishing the data.")
