@@ -1,0 +1,23 @@
+import time
+from datetime import datetime
+from gpiozero import LED
+led=LED(6)
+import seriat
+s=serial.Serial("/dev/rfcomme", 9600,timeout=1)
+commands=('1','0','')
+while True:
+        inp=s.readline().decode('utf8').strip().lower()
+        print(inp)
+        if inp in commands:
+            if inp='1':
+            led.on()
+            print("Led is on")
+            s.write('Led turned on\n'.encode('ascii'))
+        if inp='0':
+            led.off()
+            s.write('Led turned off\n'.encode('ascii'))
+            print("Led is off")
+        else:
+            print('Invalid command word')
+            s.write('Invalid command word\n'.encode('ascii'))
+            time.sleep(2)
