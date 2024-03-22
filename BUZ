@@ -1,0 +1,20 @@
+import time
+import RPi.GPIO as gpio 
+bz_board_pin=38 
+bz_bcm_pin=20
+gpio.setwarnings(False) 
+gpio.setmode(gpio.BOARD)
+gpio.setup(bz_board_pin,gpio.OUT)
+def bzBeep(ontime=1,offtime=1):
+    gpio.output(bz_board_pin,gpio.HIGH)
+    time.sleep(ontime)
+    gpio.output(bz_board_pin,gpio.LOW)
+    time.sleep(offtime)
+    return
+try:
+    while True: 
+        bzBeep()
+except KeyboardInterrupt:
+    gpio.output(bz_board_pin,gpio.LOW)
+    gpio.cleanup()
+exit
